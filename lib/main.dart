@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_project/firebase_options.dart';
@@ -42,6 +44,29 @@ void main() async {
       }
     },
   );
+
+  // to handle foreground notifications
+  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    String payloadData = jsonEncode(message.data);
+    print('Got a message in foreground');
+    if (message.notification != null) {
+      NotificationService.showSimpleNotification(
+          title: message.notification!.title!,
+          body: message.notification!.body!,
+          payload: payloadData);
+    }
+  });
+
+  // to handle terminated state
+  final RemoteMessage? message =
+      await FirebaseMessaging.instance.getInitialMessage();
+
+  if (message != null) {
+    print('Launched from terminated state');
+    Future.delayed(Duration(seconds: 1), () {
+      navigatorKey.currentState!.pushNamed('/message', arguments: message);
+    });
+  }
 
   runApp(const MyApp());
 }

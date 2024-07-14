@@ -1,4 +1,5 @@
 import 'package:firebase_project/util/services/auth_service.dart';
+import 'package:firebase_project/util/services/notification_service.dart';
 import 'package:flutter/material.dart';
 
 class HomePage extends StatefulWidget {
@@ -9,6 +10,12 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  @override
+  void initState() {
+    NotificationService.getDeviceToken();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

@@ -1,5 +1,7 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_project/main.dart';
+import 'package:firebase_project/util/services/api_service.dart';
+import 'package:firebase_project/util/services/auth_service.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class NotificationService {
@@ -20,8 +22,27 @@ class NotificationService {
     );
 
     // get the device fcm token
+    // final fcmToken = await _firebaseMessaging.getToken();
+    // print('Device token : $fcmToken');
+  }
+
+  static Future getDeviceToken() async {
     final fcmToken = await _firebaseMessaging.getToken();
     print('Device token : $fcmToken');
+
+    bool isUserLoggedIn = await AuthService.isLoggedIn();
+    if (isUserLoggedIn) {
+      await ApiService.saveUserToken(fcmToken!);
+      print('Data has been saved in firestore');
+    }
+
+    // also sacve the token if token has changed
+    _firebaseMessaging.onTokenRefresh.listen((event) async {
+      if (isUserLoggedIn) {
+        await ApiService.saveUserToken(fcmToken!);
+        print('Saved Fcm token to firestore');
+      }
+    });
   }
 
   // initialize local notifications
